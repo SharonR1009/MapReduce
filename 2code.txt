@@ -1,0 +1,177 @@
+
+import java.io.IOException;
+import java.util.*;
+
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.conf.*;
+import org.apache.hadoop.io.*;
+import org.apache.hadoop.mapred.*;
+import org.apache.hadoop.util.*;
+
+public class Locations {
+    public static class Map extends MapReduceBase implements Mapper<LongWritable, Text, Text, IntWritable> {
+        private final static IntWritable one = new IntWritable(1);
+	private final static IntWritable zero = new IntWritable(0);
+        private Text City = new Text();
+        static class CityLocation{
+            double x;
+            double y;
+            CityLocation(double x, double y){
+                this.x = x;
+                this.y = y;
+            }
+        }
+        private static HashMap<String, CityLocation> CityName = new HashMap<String,CityLocation>();
+        Map(){
+            CityName.put("New York", new CityLocation(6967.4, 29150));
+            CityName.put("Los Angeles", new CityLocation(17296.4, 12625.8));
+            CityName.put("Chicago", new CityLocation(32293.8, 29658.2));
+            CityName.put("Houston", new CityLocation(26910.4, 6275.5));
+            CityName.put("Philadelphia", new CityLocation(30959.5, 25609.1));
+            CityName.put("Phoenix", new CityLocation(18509.7, 10957.1));
+            CityName.put("San Antonio", new CityLocation(540.1, 3294.5));
+            CityName.put("San Diego", new CityLocation(13136.2, 5309.7));
+            CityName.put("Dallas", new CityLocation(5979.6, 35630.1));
+            CityName.put("San Jose", new CityLocation(16064.4, 4292.2));
+            CityName.put("Austin", new CityLocation(168.3, 321.2));
+            CityName.put("Jacksonville", new CityLocation(13620.2, 19163.1));
+            CityName.put("Indianapolis", new CityLocation(20587.6, 21689.8));
+            CityName.put("San Francisco", new CityLocation(21884.5, 5991.7));
+            CityName.put("Columbus", new CityLocation(23898.6, 16248.1));
+            CityName.put("Fort Worth", new CityLocation(12691.8, 2055.9));
+            CityName.put("Charlotte", new CityLocation(21903.2, 28233.7));
+            CityName.put("Detroit", new CityLocation(28928.9, 18738.5));
+            CityName.put("El Paso", new CityLocation(10883.4, 31573.3));
+            CityName.put("Memphis", new CityLocation(26192.1, 34454.2));
+            CityName.put("Boston", new CityLocation(33366.3, 19440.3));
+            CityName.put("Seattle", new CityLocation(5130.4, 16655.1));
+            CityName.put("Denver", new CityLocation(8482.1, 31078.3));
+            CityName.put("Washington", new CityLocation(7554.8, 28101.7));
+            CityName.put("Nashville", new CityLocation(30408.4, 35928.2));
+            CityName.put("Baltimore", new CityLocation(36032.7, 22040.7));
+            CityName.put("Louisville", new CityLocation(14144.9, 9595.3));
+            CityName.put("Portland", new CityLocation(10715.1, 30281.9));
+            CityName.put("Oklahoma City", new CityLocation(855.8, 13547.6));
+            CityName.put("Milwaukee", new CityLocation(3338.5, 24409));
+            CityName.put("Las Vegas", new CityLocation(2026.2, 316.8));
+            CityName.put("Albuquerque", new CityLocation(33116.6, 9944));
+            CityName.put("Tucson", new CityLocation(9836.2, 21190.4));
+            CityName.put("Fresno", new CityLocation(24912.8, 30190.6));
+            CityName.put("Sacramento", new CityLocation(26185.5, 17479));
+            CityName.put("Long Beach", new CityLocation(7401.9, 26807));
+            CityName.put("Kansas City", new CityLocation(16885, 16506.6));
+            CityName.put("Mesa", new CityLocation(34211.1, 26832.3));
+            CityName.put("Virginia Beach", new CityLocation(3902.8, 21591.9));
+            CityName.put("Atlanta", new CityLocation(13885.3, 26492.4));
+            CityName.put("Colorado Springs", new CityLocation(21949.4, 20631.6));
+            CityName.put("Raleigh", new CityLocation(13024, 5462.6));
+            CityName.put("Omaha", new CityLocation(8113.6, 15324.1));
+            CityName.put("Miami", new CityLocation(28938.8, 18638.4));
+            CityName.put("Oakland", new CityLocation(35682.9, 27088.6));
+            CityName.put("Tulsa", new CityLocation(12455.3, 6090.7));
+            CityName.put("Minneapolis", new CityLocation(23691.8, 17729.8));
+            CityName.put("Cleveland", new CityLocation(2290.2, 25221.9));
+            CityName.put("Wichita", new CityLocation(18195.1, 5316.3));
+            CityName.put("Arlington", new CityLocation(34226.5, 5102.9));
+            CityName.put("New Orleans", new CityLocation(32623.8, 24974.4));
+            CityName.put("Bakersfield", new CityLocation(10923, 15374.7));
+            CityName.put("Tampa", new CityLocation(2536.6, 34840.3));
+            CityName.put("Honolulu", new CityLocation(24624.6, 5523.1));
+            CityName.put("Anaheim", new CityLocation(31619.5, 29616.4));
+            CityName.put("Aurora", new CityLocation(20979.2, 6897));
+            CityName.put("Santa Ana", new CityLocation(6411.9, 29454.7));
+            CityName.put("Riverside", new CityLocation(17130.3, 5606.7));
+            CityName.put("Corpus Christi", new CityLocation(18163.2, 26384.6));
+            CityName.put("Pittsburgh", new CityLocation(14619, 10077.1));
+            CityName.put("Lexington", new CityLocation(20499.6, 24590.5));
+            CityName.put("Anchorage", new CityLocation(27243.7, 26020.5));
+            CityName.put("Stockton", new CityLocation(17131.4, 4434.1));
+            CityName.put("Cincinnati", new CityLocation(13257.2, 30085));
+            CityName.put("Saint Paul", new CityLocation(1265, 18635.1));
+            CityName.put("Toledo", new CityLocation(23896.4, 15362.6));
+            CityName.put("Newark", new CityLocation(3773, 34217.7));
+            CityName.put("Greensboro", new CityLocation(33210.1, 19807.7));
+            CityName.put("Plano", new CityLocation(12470.7, 17002.7));
+            CityName.put("Henderson", new CityLocation(13515.7, 30528.3));
+            CityName.put("Lincoln", new CityLocation(11421.3, 16439.5));
+            CityName.put("Buffalo", new CityLocation(9799.9, 35429.9));
+            CityName.put("Fort Wayne", new CityLocation(10733.8, 26643.1));
+            CityName.put("Jersey City", new CityLocation(20446.8, 7064.2));
+            CityName.put("Chula Vista", new CityLocation(27440.6, 30256.6));
+            CityName.put("Orlando", new CityLocation(14333, 18054.3));
+            CityName.put("St. Petersburg", new CityLocation(32084.8, 990));
+            CityName.put("Norfolk", new CityLocation(35850.1, 20638.2));
+            CityName.put("Chandler", new CityLocation(1820.5, 19151));
+            CityName.put("Laredo", new CityLocation(6994.9, 30386.4));
+            CityName.put("Madison", new CityLocation(22590.7, 23702.8));
+            CityName.put("Durham", new CityLocation(7131.3, 30354.5));
+            CityName.put("Lubbock", new CityLocation(4445.1, 3962.2));
+            CityName.put("Winston", new CityLocation(26785, 11320.1));
+            CityName.put("Salem", new CityLocation(33919.6, 10311.4));
+            CityName.put("Garland", new CityLocation(12122, 5055.6));
+            CityName.put("Glendale", new CityLocation(26423.1, 30082.8));
+            CityName.put("Hialeah", new CityLocation(25518.9, 21634.8));
+            CityName.put("Reno", new CityLocation(26932.4, 9109.1));
+            CityName.put("Baton Rouge", new CityLocation(5207.4, 58.3));
+            CityName.put("Irvine", new CityLocation(2198.9, 29059.8));
+            CityName.put("Chesapeake", new CityLocation(30731.8, 7590));
+            CityName.put("Irving", new CityLocation(4166.8, 19939.7));
+            CityName.put("Scottsdale", new CityLocation(513.7, 4100.8));
+            CityName.put("Fremont", new CityLocation(16382.3, 27112.8));
+            CityName.put("Gilbert", new CityLocation(24731.3, 19587.7));
+            CityName.put("San Bernardino", new CityLocation(2663.1, 15741));
+            CityName.put("Boise", new CityLocation(7278.7, 25094.3));
+            CityName.put("Birmingham", new CityLocation(10465.4, 15739.9));
+            CityName.put("(null)", new CityLocation(8377.6, 20828.5));
+        }
+
+        public void map(LongWritable key, Text value, OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {
+            String line = value.toString();
+            String []location = line.split(", ",4);
+            CityLocation CityLocation = CityName.get(location[1]);
+            double x = Double.parseDouble(location[2])-CityLocation.x;
+            double y = Double.parseDouble(location[3])-CityLocation.y;
+            if(Math.sqrt(x*x + y*y) <= 5.0){
+                City.set(location[1]);
+                output.collect(City,one);
+            }
+	    else {
+		City.set(location[1]);
+                output.collect(City,zero);
+	    }
+        }
+
+
+    }
+
+    public static class Reduce extends MapReduceBase implements Reducer<Text, IntWritable, Text, IntWritable> {
+        public void reduce(Text key, Iterator<IntWritable> values, OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {
+            int sum = 0;
+            while (values.hasNext()) {
+                sum += values.next().get();
+            }
+            output.collect(key, new IntWritable(sum));
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        JobConf conf = new JobConf(Locations.class);
+        conf.setJobName("Locations");
+
+        conf.setOutputKeyClass(Text.class);
+        conf.setOutputValueClass(IntWritable.class);
+
+        conf.setMapperClass(Map.class);
+        conf.setCombinerClass(Reduce.class);
+        conf.setReducerClass(Reduce.class);
+
+        conf.setInputFormat(TextInputFormat.class);
+        conf.setOutputFormat(TextOutputFormat.class);
+
+        FileInputFormat.setInputPaths(conf, new Path(args[0]));
+        FileOutputFormat.setOutputPath(conf, new Path(args[1]));
+
+        JobClient.runJob(conf);
+    }
+
+}
